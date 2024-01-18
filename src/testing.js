@@ -1,12 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import lighthouse from 'lighthouse';
-import * as chromeLauncher from 'chrome-launcher';
+import puppeteer from 'puppeteer';
 import { urlData } from './data.js';
 import desktopConfig from 'lighthouse/core/config/desktop-config.js';
 import mobileConfig from 'lighthouse/core/config/lr-mobile-config.js';
 
-const launchChrome = () => chromeLauncher.launch({ chromeFlags: ['--headless']});
+const launchChrome = async () => {
+  const browser = await puppeteer.launch({
+    headless: 'new'
+  });  
+  const port = (new URL(browser.wsEndpoint())).port;
+  return { browser, port };
+};
 
 const createFolderIfNotExists = (folderPath) => {
   if (!fs.existsSync(folderPath)) {
@@ -38,7 +44,7 @@ const saveCategoryScores = (pageFolder, websiteName, pageType, configType, categ
 
 
 const runLighthouseForUrl = async (websiteName, pageType, outputPath, config, configType) => {
-  const chromeInstance = await launchChrome();
+  const { browser, port } = await launchChrome();
   try {
     const url = urlData[websiteName]?.[pageType];
     console.log(`Processing URL for ${websiteName} - ${pageType} - ${configType}: ${url}`);
@@ -52,7 +58,7 @@ const runLighthouseForUrl = async (websiteName, pageType, outputPath, config, co
       logLevel: 'info',
       output: 'html',
       categories: ['performance', 'accessibility', 'best-practices', 'seo'],
-      port: chromeInstance.port,
+      port,
     };
     
     
@@ -74,7 +80,7 @@ const runLighthouseForUrl = async (websiteName, pageType, outputPath, config, co
   } catch (error) {
     console.error('Error:', error.message);
   } finally {
-    chromeInstance.kill();
+    await browser.close();
   }
 };
 

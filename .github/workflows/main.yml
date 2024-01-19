@@ -1,0 +1,18 @@
+ame: Assertions and static report
+
+on:
+  workflow_dispatch:
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install Dependencies
+        run: npm install -g @unlighthouse/cli puppeteer netlify-cli
+
+      - name: Unlighthouse assertions and client
+        run: unlighthouse-ci --site https://www.capitools.com/ --budget 75 --build-static

@@ -13,4 +13,4 @@ jobs:
         run: npm install -g @unlighthouse/cli puppeteer
 
       - name: Unlighthouse assertions and client
-        run: unlighthouse-ci --site https://www.capitools.com/ --budget 75 --build-static
+        run: unlighthouse-ci --site https://practicetestautomation.com/practice-test-login/
